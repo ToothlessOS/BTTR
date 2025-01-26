@@ -157,8 +157,8 @@ class CROHMEDatamodule(pl.LightningDataModule):
         self,
         zipfile_path: str = f"{os.path.dirname(os.path.realpath(__file__))}/../../data.zip",
         test_year: str = "2014",
-        batch_size: int = 8,
-        num_workers: int = 5,
+        batch_size: int = 8, # 8
+        num_workers: int = 0, # 5
     ) -> None:
         super().__init__()
         assert isinstance(test_year, str)

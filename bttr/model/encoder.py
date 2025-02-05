@@ -175,9 +175,18 @@ class Encoder(pl.LightningModule):
         feature, mask = self.model(img, img_mask)
         feature = self.feature_proj(feature)
 
+        # For testing, we check the shape of 'feature' & 'mask'
+        print(feature.shape)
+        print(mask.shape)
+
         # proj
         feature = rearrange(feature, "b d h w -> b h w d")
+        # feature.shape => [8, 5, 9, 256] (batch, height, width, embed_dim)
+        # For testing, check 'mask'
         feature = self.norm(feature)
+
+        print(mask)
+        print(feature)
 
         # positional encoding
         feature = self.pos_enc_2d(feature, mask)

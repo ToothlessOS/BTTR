@@ -15,6 +15,7 @@ class Encoder(pl.LightningModule):
     def __init__(self, d_model: int, growth_rate: int, num_layers: int, is_pretrained=True):
         super().__init__()
         
+        # TODO: Try the other variants of DenseNet
         if is_pretrained:
             self.model = models.densenet121(weights=models.DenseNet121_Weights.DEFAULT)
         else:
@@ -73,19 +74,12 @@ class Encoder(pl.LightningModule):
         # Designed accordingly with the downsampling layers of DenseNet-121
         # 1: 7 * 7 conv, stride 2
         img_mask =  _downsample_mask_conv(img_mask, kernel_size=7, stride=2, padding=3)
-        # 2: 3 * 3 max pool, stride 2
-        img_mask = _downsample_mask_max_pool(img_mask, kernel_size=3, stride=2)
+        # 2: 3 * 3 max pool, stride 2, padding 1
+        img_mask = _downsample_mask_max_pool(img_mask, kernel_size=3, stride=2, padding=1)
         # 3: 2 * 2 avg pool, stride 2
         img_mask = _downsample_mask_avg_pool(img_mask, kernel_size=2, stride=2)
         # 4：2 * 2 avg pool, stride 2
         mask = _downsample_mask_avg_pool(img_mask, kernel_size=2, stride=2)
-
-        print(mask)
-
-        # For testing, we check the shape
-        # TODO: Dimension mismatch
-        print(feature.shape) # [1, 1024, 3, 3]
-        print(mask.shape) # [1, 4, 4]
 
         # proj
         feature = rearrange(feature, "b d h w -> b h w d")
@@ -104,11 +98,11 @@ def _downsample_mask_avg_pool(mask: LongTensor, kernel_size: int, stride: int) -
                 kernel_size=kernel_size, 
                 stride=stride).bool()
 
-def _downsample_mask_max_pool(mask: LongTensor, kernel_size: int, stride: int) -> LongTensor:
+def _downsample_mask_max_pool(mask: LongTensor, kernel_size: int, stride: int, padding: int) -> LongTensor:
     return F.max_pool2d(mask.float(), 
             kernel_size=kernel_size, 
             stride=stride,
-            ceil_mode=True).bool()
+            padding=padding).bool()
 
 def _downsample_mask_conv(mask: LongTensor, kernel_size: int, stride: int, padding: int) -> LongTensor:
 
@@ -116,6 +110,6 @@ def _downsample_mask_conv(mask: LongTensor, kernel_size: int, stride: int, paddi
     mask_padded = F.pad(mask.float(), (padding, padding, padding, padding), mode='constant', value=0)
     
     # Apply max pooling with matching kernel/stride
-    return F.max_pool2d(mask_padded.float(), 
+    return F.max_pool2d(mask_padded, 
                     kernel_size=kernel_size, 
                     stride=stride).bool()

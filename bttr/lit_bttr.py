@@ -102,6 +102,7 @@ class LitBTTR(pl.LightningModule):
         out_hat = self(batch.imgs, batch.mask, tgt)
 
         loss = ce_loss(out_hat, out)
+        # Using the default logging method
         self.log("train_loss", loss, on_step=False, on_epoch=True, sync_dist=True)
 
         return loss
@@ -143,7 +144,9 @@ class LitBTTR(pl.LightningModule):
 
         return batch.img_bases[0], vocab.indices2label(best_hyp.seq)
 
-    def test_epoch_end(self, test_outputs) -> None:
+    # Change for lightning 2.0+ compatibility
+    # TODO: Fix the empty test_outputs!
+    def on_test_epoch_end(self, test_outputs=None) -> None:
         exprate = self.exprate_recorder.compute()
         print(f"ExpRate: {exprate}")
 

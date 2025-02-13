@@ -29,4 +29,4 @@ fit:
     devices: 1
     check_val_every_n_epoch: 2
   # Resume from checkpoint
-  ckpt_path: 'lightning_logs\Intial_attempt\checkpoints\epoch=17-step=27018-val_ExpRate=0.1939.ckpt'
+  # ckpt_path: 'lightning_logs\Intial_attempt\checkpoints\epoch=17-step=27018-val_ExpRate=0.1939.ckpt'

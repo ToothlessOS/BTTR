@@ -45,6 +45,8 @@ class LitBTTR(pl.LightningModule):
 
         self.exprate_recorder = ExpRateRecorder()
 
+        self.test_outputs = []
+
     def forward(
         self, img: FloatTensor, img_mask: LongTensor, tgt: LongTensor
     ) -> FloatTensor:
@@ -142,20 +144,24 @@ class LitBTTR(pl.LightningModule):
         best_hyp = max(hyps, key=lambda h: h.score / (len(h) ** self.hparams.alpha))
         self.exprate_recorder(best_hyp.seq, batch.indices[0])
 
+        self.test_outputs.append((batch.img_bases[0], vocab.indices2label(best_hyp.seq)))
+
         return batch.img_bases[0], vocab.indices2label(best_hyp.seq)
 
     # Change for lightning 2.0+ compatibility
     # TODO: Fix the empty test_outputs!
-    def on_test_epoch_end(self, test_outputs=None) -> None:
+    def on_test_epoch_end(self) -> None:
         exprate = self.exprate_recorder.compute()
         print(f"ExpRate: {exprate}")
 
-        print(f"length of total file: {len(test_outputs)}")
+        print(f"length of total file: {len(self.test_outputs)}")
         with zipfile.ZipFile("result.zip", "w") as zip_f:
-            for img_base, pred in test_outputs:
+            for img_base, pred in self.test_outputs:
                 content = f"%{img_base}\n${pred}$".encode()
                 with zip_f.open(f"{img_base}.txt", "w") as f:
                     f.write(content)
+
+        self.test_outputs.clear()
 
     def configure_optimizers(self):
         optimizer = optim.Adadelta(

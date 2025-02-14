@@ -183,6 +183,7 @@ class CROHMEDatamodule(pl.LightningDataModule):
             shuffle=True,
             num_workers=self.num_workers,
             collate_fn=collate_fn,
+            persistent_workers=True,
         )
 
     def val_dataloader(self):
@@ -191,6 +192,7 @@ class CROHMEDatamodule(pl.LightningDataModule):
             shuffle=False,
             num_workers=self.num_workers,
             collate_fn=collate_fn,
+            persistent_workers=True,
         )
 
     def test_dataloader(self):

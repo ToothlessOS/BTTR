@@ -3,4 +3,5 @@ from pytorch_lightning.cli import LightningCLI
 from bttr.datamodule import CROHMEDatamodule
 from bttr.lit_bttr import LitBTTR
 
-cli = LightningCLI(LitBTTR, CROHMEDatamodule)
+if __name__ == "__main__":
+    cli = LightningCLI(LitBTTR, CROHMEDatamodule)

@@ -8,7 +8,7 @@ test_year = "2014"
 ckp_path = "lightning_logs/Attempt0Part1/checkpoints/epoch=27-step=42028-val_ExpRate=0.2162.ckpt"
 
 if __name__ == "__main__":
-    trainer = Trainer(logger=False, num_nodes=1)
+    trainer = Trainer(logger=False, num_nodes=1, devices=[0])
 
     dm = CROHMEDatamodule(test_year=test_year)
 

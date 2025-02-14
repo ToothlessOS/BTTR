@@ -26,12 +26,12 @@ fit:
           filename: '{epoch}-{step}-{val_ExpRate:.4f}'
     max_epochs: 300
     accelerator: cuda
-    devices: 4
+    devices: 1
     check_val_every_n_epoch: 2
   data:
     zipfile_path: data.zip
     test_year: '2014'
     batch_size: 8
-    num_workers: 0
+    num_workers: 5
   # Resume from checkpoint
   # ckpt_path: 'lightning_logs\Intial_attempt\checkpoints\epoch=17-step=27018-val_ExpRate=0.1939.ckpt'

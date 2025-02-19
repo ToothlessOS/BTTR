@@ -6,7 +6,7 @@ import torch.optim as optim
 from torch import FloatTensor, LongTensor
 
 from bttr.datamodule import Batch, vocab
-from bttr.model.bttr import BTTR
+from bttr.model.bttr_finetune import BTTR
 from bttr.utils import ExpRateRecorder, Hypothesis, ce_loss, to_bi_tgt_out
 
 
@@ -28,6 +28,7 @@ class LitBTTR(pl.LightningModule):
         alpha: float,
         # training
         learning_rate: float,
+        finetune_learning_rate: float,
         patience: int,
     ):
         super().__init__()
@@ -164,6 +165,15 @@ class LitBTTR(pl.LightningModule):
 
     # TODO: Add the configurations required for finetuning
     def configure_optimizers(self):
+        
+        # Apply different lr to finetuning & groud-up training
+        encoder_params = []
+        other_params = []
+
+        # Test
+        for name, params in self.named_parameters():
+            print(name)
+        
         optimizer = optim.Adadelta(
             self.parameters(),
             lr=self.hparams.learning_rate,

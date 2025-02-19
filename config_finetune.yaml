@@ -12,6 +12,7 @@ fit:
     max_len: 200
     alpha: 1.0
     learning_rate: 1.0
+    finetune_learning_rate: 0.1
     patience: 20
   trainer:
     callbacks:

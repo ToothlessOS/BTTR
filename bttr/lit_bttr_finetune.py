@@ -9,6 +9,7 @@ from bttr.datamodule import Batch, vocab
 from bttr.model.bttr_finetune import BTTR
 from bttr.utils import ExpRateRecorder, Hypothesis, ce_loss, to_bi_tgt_out
 
+from pytorch_lightning.callbacks import BaseFinetuning
 
 class LitBTTR(pl.LightningModule):
     def __init__(
@@ -166,20 +167,25 @@ class LitBTTR(pl.LightningModule):
     # TODO: Add the configurations required for finetuning
     def configure_optimizers(self):
         
-        # Apply different lr to finetuning & groud-up training
+        # Apply different lr to finetuning (encoder) & groud-up training (decoder)
         encoder_params = []
-        other_params = []
+        decoder_params = []
 
-        # Test
         for name, params in self.named_parameters():
-            print(name)
-        
-        optimizer = optim.Adadelta(
-            self.parameters(),
-            lr=self.hparams.learning_rate,
-            eps=1e-6,
-            weight_decay=1e-4,
-        )
+            if "encoder" in name:
+                encoder_params.append(params)
+            elif "decoder" in name:
+                decoder_params.append(params)
+
+        # Test for the trainable params
+        print("Params states check: ")
+        for name, param in self.named_parameters():
+            print(f"{name}: {param.requires_grad}")
+
+        optimizer = optim.Adadelta([
+            {'params': encoder_params, 'lr': self.hparams.finetune_learning_rate, 'eps': 1e-6, 'weight_decay': 1e-4},
+            {'params': decoder_params, 'lr': self.hparams.learning_rate, 'eps': 1e-6, 'weight_decay': 1e-4}
+        ])
 
         reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
             optimizer,
@@ -196,3 +202,21 @@ class LitBTTR(pl.LightningModule):
         }
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
+
+
+class GradualUnfreeze(BaseFinetuning):
+    """
+    Gradually unfreeze the encoder layers during training.
+    For Finetuning use.
+    """
+    def __init__(self, unfreeze_n_epoch=2, layers_per_epoch=2):
+        super.__init__()
+
+    def freeze_before_training(self, pl_module):
+        self.freeze(pl_module.encoder.model.features)
+        print(pl_module.encoder.model.features)
+
+    def finetune_function(self, pl_module, current_epoch, optimizer):
+        # Unfreeze the 3rd _dense, 2nd _transition, 2nd _dense sequential
+        # Remember to add dropout (n=0.2) while unfreezing
+        pass

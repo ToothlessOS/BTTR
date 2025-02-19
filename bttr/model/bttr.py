@@ -7,7 +7,7 @@ from torch import FloatTensor, LongTensor
 from bttr.utils import Hypothesis
 
 from .decoder import Decoder
-from .encoder_mod_densenet_pretrained_add_dropout import Encoder
+from .encoder_mod_densenet_pretrained_full_finetune import Encoder
 # from .encoder import Encoder
 
 

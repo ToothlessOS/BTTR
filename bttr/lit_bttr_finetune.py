@@ -182,8 +182,11 @@ class LitBTTR(pl.LightningModule):
         for name, param in self.named_parameters():
             print(f"{name}: {param.requires_grad}")
 
+        # Filter out the intially trainable encoder params (BatchNorm Layers)
+        encoder_trainable_params = filter(lambda p: p.requires_grad, encoder_params)
+
         optimizer = optim.Adadelta([
-            {'params': encoder_params, 'lr': self.hparams.finetune_learning_rate, 'eps': 1e-6, 'weight_decay': 1e-4},
+            {'params': encoder_trainable_params, 'lr': self.hparams.finetune_learning_rate, 'eps': 1e-6, 'weight_decay': 1e-4},
             {'params': decoder_params, 'lr': self.hparams.learning_rate, 'eps': 1e-6, 'weight_decay': 1e-4}
         ])
 
@@ -209,14 +212,43 @@ class GradualUnfreeze(BaseFinetuning):
     Gradually unfreeze the encoder layers during training.
     For Finetuning use.
     """
-    def __init__(self, unfreeze_n_epoch=2, layers_per_epoch=2):
-        super.__init__()
+    def __init__(self, unfreeze_n_epoch=2):
+        super().__init__()
+        self.unfreeze_n_epoch = unfreeze_n_epoch
 
     def freeze_before_training(self, pl_module):
-        self.freeze(pl_module.encoder.model.features)
-        print(pl_module.encoder.model.features)
+        # This freeze method freeze the DenseNet except for the BatchNorm layers
+        self.freeze(pl_module.bttr.encoder.model.features)
 
     def finetune_function(self, pl_module, current_epoch, optimizer):
-        # Unfreeze the 3rd _dense, 2nd _transition, 2nd _dense sequential
+        # Unfreeze the 3rd _dense, 2nd _transition, 2nd _dense sequentially
         # Remember to add dropout (n=0.2) while unfreezing
-        pass
+        if current_epoch % self.unfreeze_n_epoch == 0:
+            i = current_epoch // self.unfreeze_n_epoch
+            # DenseBlock3
+            if i < 24:
+                # Unfreeze
+                self.unfreeze_and_add_param_group(pl_module.get_submodule(f'bttr.encoder.model.features.8.denselayer{24-i}.conv1')
+                                                  ,optimizer=optimizer
+                                                  ,lr=pl_module.hparams.finetune_learning_rate)
+                self.unfreeze_and_add_param_group(pl_module.get_submodule(f'bttr.encoder.model.features.8.denselayer{24-i}.conv2')
+                                                    ,optimizer=optimizer
+                                                    ,lr=pl_module.hparams.finetune_learning_rate)
+                # Add dropout
+                pl_module.get_submodule(f'bttr.encoder.model.features.8.denselayer{24-i}').drop_rate = 0.2
+
+            # TransitionBlock2
+            elif i == 24:
+                self.unfreeze_and_add_param_group(pl_module.get_submodule('bttr.encoder.model.features.7.conv')
+                                                  ,optimizer=optimizer
+                                                  ,lr=pl_module.hparams.finetune_learning_rate)
+            
+            # DenseBlock2
+            elif i < 37:
+                self.unfreeze_and_add_param_group(pl_module.get_submodule(f'bttr.encoder.model.features.6.denselayer{37-i}.conv1')
+                                                  ,optimzer=optimizer
+                                                  ,lr=pl_module.hparams.finetune_learning_rate)
+                self.unfreeze_and_add_param_group(pl_module.get_submodule(f'bttr.encoder.model.features.6.denselayer{37-i}.conv2')
+                                                    ,optimzer=optimizer
+                                                    ,lr=pl_module.hparams.finetune_learning_rate)
+                pl_module.get_submodule(f'bttr.encoder.model.features.6.denselayer{37-i}').drop_rate = 0.2

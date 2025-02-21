@@ -17,10 +17,6 @@ class Encoder(pl.LightningModule):
         
         self.model = models.densenet121(weights=models.DenseNet121_Weights.DEFAULT)
 
-        # Freeze all modules of the DenseNet first (for fine-tuning)
-        for param in self.model.parameters():
-            param.requires_grad = False
-
         # Remove the Transition Layer 3, Dense Block 4 and Classification Layer from the model
         self.model.features = nn.Sequential(
             *list(self.model.features.children())[:-3]  # Keep layers up to Dense Block 3

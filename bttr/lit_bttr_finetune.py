@@ -246,9 +246,9 @@ class GradualUnfreeze(BaseFinetuning):
             # DenseBlock2
             elif i < 37:
                 self.unfreeze_and_add_param_group(pl_module.get_submodule(f'bttr.encoder.model.features.6.denselayer{37-i}.conv1')
-                                                  ,optimzer=optimizer
+                                                  ,optimizer=optimizer
                                                   ,lr=pl_module.hparams.finetune_learning_rate)
                 self.unfreeze_and_add_param_group(pl_module.get_submodule(f'bttr.encoder.model.features.6.denselayer{37-i}.conv2')
-                                                    ,optimzer=optimizer
+                                                    ,optimizer=optimizer
                                                     ,lr=pl_module.hparams.finetune_learning_rate)
                 pl_module.get_submodule(f'bttr.encoder.model.features.6.denselayer{37-i}').drop_rate = 0.2

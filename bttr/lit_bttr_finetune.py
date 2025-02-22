@@ -10,6 +10,7 @@ from bttr.model.bttr_finetune import BTTR
 from bttr.utils import ExpRateRecorder, Hypothesis, ce_loss, to_bi_tgt_out
 
 from pytorch_lightning.callbacks import BaseFinetuning
+from pytorch_lightning.callbacks import Callback
 
 class LitBTTR(pl.LightningModule):
     def __init__(
@@ -207,6 +208,7 @@ class LitBTTR(pl.LightningModule):
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
 
 
+# Callback for gradually unfreezing encoder layer during finetuning
 class GradualUnfreeze(BaseFinetuning):
     """
     Gradually unfreeze the encoder layers during training.
@@ -252,3 +254,11 @@ class GradualUnfreeze(BaseFinetuning):
                                                     ,optimizer=optimizer
                                                     ,lr=pl_module.hparams.finetune_learning_rate)
                 pl_module.get_submodule(f'bttr.encoder.model.features.6.denselayer{37-i}').drop_rate = 0.2
+
+# Callback during testing for visualization & validation (feature extraction)
+class VisualizeAndValidateCallback(Callback):
+    def on_test_epoch_start(self, trainer, pl_module):
+        print("Testing started")
+
+    def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
+        print("Testing ends")

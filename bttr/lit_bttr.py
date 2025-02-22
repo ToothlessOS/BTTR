@@ -9,6 +9,7 @@ from bttr.datamodule import Batch, vocab
 from bttr.model.bttr import BTTR
 from bttr.utils import ExpRateRecorder, Hypothesis, ce_loss, to_bi_tgt_out
 
+from pytorch_lightning.callbacks import Callback
 
 class LitBTTR(pl.LightningModule):
     def __init__(
@@ -162,7 +163,6 @@ class LitBTTR(pl.LightningModule):
 
         self.test_outputs.clear()
 
-    # TODO: Add the configurations required for finetuning
     def configure_optimizers(self):
         optimizer = optim.Adadelta(
             self.parameters(),
@@ -186,3 +186,11 @@ class LitBTTR(pl.LightningModule):
         }
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
+    
+# Callback during testing for visualization & validation (featuer extraction)
+class VisualizeAndValidateCallback(Callback):
+    def on_test_epoch_start(self, trainer, pl_module):
+        print("Testing started")
+
+    def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
+        print("Testing ends")

@@ -9,3 +9,6 @@ black
 isort
 jupyter
 tensorboard
+# visualization
+scikit-learn
+matplotlib

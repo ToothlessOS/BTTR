@@ -257,8 +257,9 @@ class GradualUnfreeze(BaseFinetuning):
 
 # Callback during testing for visualization & validation (feature extraction)
 class VisualizeAndValidateCallback(Callback):
-    def on_test_epoch_start(self, trainer, pl_module):
+    def on_test_epoch_start(self, trainer, pl_module): 
         print("Testing started")
-
+        # Extract and visualiza the word embeddings
+        embedding = pl_module.get_submodule("bttr.decoder.word_embed.0").weight.data
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
-        print("Testing ends")
+        pass

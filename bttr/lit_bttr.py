@@ -151,7 +151,7 @@ class LitBTTR(pl.LightningModule):
         self.test_outputs.append((batch.img_bases[0], vocab.indices2label(best_hyp.seq)))
 
         # Record the encoded features during test-time
-        extracted_features = self.bttr.encoder.extracted_features.shape
+        extracted_features = self.bttr.encoder.extracted_features
 
         return batch.img_bases[0], vocab.indices2label(best_hyp.seq), extracted_features
 
@@ -214,3 +214,4 @@ class VisualizeAndValidateCallback(Callback):
         # The features extracted
         filename = outputs[0]
         encoded_features = outputs[2]
+        print(encoded_features)

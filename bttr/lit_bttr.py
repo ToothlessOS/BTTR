@@ -213,5 +213,16 @@ class VisualizeAndValidateCallback(Callback):
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
         # The features extracted
         filename = outputs[0]
-        encoded_features = outputs[2]
-        print(encoded_features)
+        encoded_features = outputs[2].squeeze(0).cpu().numpy()
+        
+        # Apply TSNE on the extracted features
+        tsne = TSNE(n_components=2, random_state=42, perplexity=5)
+        features_tsne = tsne.fit_transform(encoded_features)
+
+        # Visualization
+        fig = plt.figure(figsize=(10, 10))
+        plt.scatter(features_tsne[:, 0], features_tsne[:, 1])
+        plt.title(f'TSNE Visualization of Encoded Features of {filename} in 2D')
+        plt.xlabel('TSNE Dimension 1')
+        plt.ylabel('TSNE Dimension 2')
+        plt.show()

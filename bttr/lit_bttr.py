@@ -150,7 +150,10 @@ class LitBTTR(pl.LightningModule):
 
         self.test_outputs.append((batch.img_bases[0], vocab.indices2label(best_hyp.seq)))
 
-        return batch.img_bases[0], vocab.indices2label(best_hyp.seq)
+        # Record the encoded features during test-time
+        extracted_features = self.bttr.encoder.extracted_features.shape
+
+        return batch.img_bases[0], vocab.indices2label(best_hyp.seq), extracted_features
 
     # Changed for lightning 2.0+ compatibility
     def on_test_epoch_end(self) -> None:
@@ -210,4 +213,6 @@ class VisualizeAndValidateCallback(Callback):
         plt.show()
 
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
-        pass
+        # The features extracted
+        filename = outputs[0]
+        encoded_features = outputs[2]

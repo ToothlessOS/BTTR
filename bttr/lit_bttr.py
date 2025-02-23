@@ -199,17 +199,15 @@ class VisualizeAndValidateCallback(Callback):
         print("Testing started")
         # Extract and visualiza the word embeddings + Apply TSNE
         embedding = pl_module.get_submodule("bttr.decoder.word_embed.0").weight.data.cpu().numpy()
-        tsne = TSNE(n_components=3, random_state=42)
+        tsne = TSNE(n_components=2, random_state=42)
         features_tsne = tsne.fit_transform(embedding)
 
         # Visualization
         fig = plt.figure(figsize=(10, 10))
-        ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(features_tsne[:, 0], features_tsne[:, 1], features_tsne[:, 2])
-        ax.set_title('TSNE Visualization of BTTR Model Output Features in 3D')
-        ax.set_xlabel('TSNE Dimension 1')
-        ax.set_ylabel('TSNE Dimension 2')
-        ax.set_zlabel('TSNE Dimension 3')
+        plt.scatter(features_tsne[:, 0], features_tsne[:, 1])
+        plt.title('TSNE Visualization of BTTR Model Output Features in 2D')
+        plt.xlabel('TSNE Dimension 1')
+        plt.ylabel('TSNE Dimension 2')
         plt.show()
 
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):

@@ -37,6 +37,9 @@ class Encoder(pl.LightningModule):
 
         self.pos_enc_2d = ImgPosEnc(d_model, normalize=True)
 
+        # For checking the features extracted by the encoder
+        self.extracted_features = None
+
     def forward(
         self, img: FloatTensor, img_mask: LongTensor
     ) -> Tuple[FloatTensor, LongTensor]:
@@ -85,6 +88,9 @@ class Encoder(pl.LightningModule):
         # flat to 1-D
         feature = rearrange(feature, "b h w d -> b (h w) d")
         mask = rearrange(mask, "b h w -> b (h w)")
+
+        self.extracted_features = feature
+        
         return feature, mask
     
 def _downsample_mask_avg_pool(mask: LongTensor, kernel_size: int, stride: int) -> LongTensor:

@@ -208,7 +208,7 @@ class VisualizeAndValidateCallback(Callback):
         plt.title('TSNE Visualization of BTTR Model Output Features in 2D')
         plt.xlabel('TSNE Dimension 1')
         plt.ylabel('TSNE Dimension 2')
-        plt.show()
+        plt.savefig("lightning_logs/FeatureExtraction/PretrainedDenseNet+dropout/features/word_embed.png")
 
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
         # The features extracted
@@ -225,4 +225,4 @@ class VisualizeAndValidateCallback(Callback):
         plt.title(f'TSNE Visualization of Encoded Features of {filename} in 2D')
         plt.xlabel('TSNE Dimension 1')
         plt.ylabel('TSNE Dimension 2')
-        plt.show()
+        plt.savefig(f"lightning_logs/FeatureExtraction/PretrainedDenseNet+dropout/features/{filename}.png")

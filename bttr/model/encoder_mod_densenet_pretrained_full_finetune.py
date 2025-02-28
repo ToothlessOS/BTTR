@@ -15,7 +15,7 @@ class Encoder(pl.LightningModule):
     def __init__(self, d_model: int, growth_rate: int, num_layers: int, is_pretrained=True):
         super().__init__()
         
-        self.model = models.densenet121(weights=models.DenseNet121_Weights.DEFAULT, drop_rate=0.2)
+        self.model = models.densenet121(weights=models.DenseNet121_Weights.DEFAULT, drop_rate=0.3)
 
         # Freeze all but the last denseblock (for fine-tuning)
         for param in self.model.parameters():
